@@ -625,6 +625,32 @@ label.f.quick input{letter-spacing:.06em}
 .st-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
 .st-item img{width:100%;border-radius:10px;display:block}
 .st-item p{margin:4px 0!important;word-break:break-all}
+.roles{display:grid;gap:10px}
+.role{position:relative;background:var(--paper2);border-radius:16px;padding:14px 16px}
+.role .rk{display:block;font-size:12px;font-weight:700;color:var(--seal)}
+.role b{display:block;font:400 22px/1.3 var(--hand);margin:2px 0 4px}
+.role p{margin:0 0 6px!important;font-size:15px}
+.role .star{color:var(--seal);font-weight:700;font-size:13px!important}
+.role .tag{position:absolute;right:12px;top:12px}
+.pm{margin:6px 0 14px}
+.pmh{display:flex;justify-content:space-between;align-items:baseline}
+.pmh b{font-size:15px} .pmh span{font:400 26px var(--hand);color:var(--seal)}
+.pmb{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:4px 0 6px}
+.pmb i{display:block;height:100%;background:var(--seal);border-radius:5px}
+.ptype{font-size:14px;color:var(--sky-muted)!important}
+.lockwrap{position:relative}
+.blur{filter:blur(7px);user-select:none;pointer-events:none;opacity:.75}
+.lockcta{position:absolute;inset:0;margin:auto;height:max-content;width:max-content;max-width:90%;appearance:none;border:0;cursor:pointer;background:var(--paper);color:var(--ink);border-radius:18px;padding:14px 18px;font:700 15px var(--sans);box-shadow:0 10px 30px -12px rgba(120,40,60,.45);display:grid;gap:2px;text-align:center}
+.lockcta span{font-size:18px}
+.lockcta small{font-weight:500;font-size:12px;color:var(--seal)}
+.lockcta.big{top:24px;bottom:auto;padding:18px 26px;font-size:17px;background:var(--seal);color:var(--on-seal)}
+.lockcta.big small{color:var(--on-seal);opacity:.9}
+.lockcta:focus-visible{outline:2px solid var(--seal);outline-offset:3px}
+.lk-in{padding:6px 0 10px}
+.lk-in h3{font:400 22px var(--hand);margin:6px 0 8px}
+.lockl{margin:0 0 14px;padding-left:18px;display:grid;gap:4px;font-size:15px}
+.ul-badge{background:var(--paper2);border-radius:12px;padding:10px 12px;font-size:14px;margin:0}
+#unlock-sheet .btn{text-align:center;text-decoration:none;display:block}
 .card.ai{display:none!important}
 </style>
 <script>(function () { try { if (location.hash === '#me-off') localStorage.setItem('skipgc', 't'); else if (location.hash === '#me-on') localStorage.removeItem('skipgc'); } catch (e) {} })(); window.goatcounter = { path: function () { return location.pathname; }, no_onload: (function () { try { return localStorage.getItem('skipgc') === 't'; } catch (e) { return false; } })() };</script>
@@ -1737,9 +1763,132 @@ function computeMatch(A, B) {
   const verdict = score >= 85 ? '서로가 서로의 빈칸 같은 사이야.' : score >= 72 ? '맞춰 갈수록 단단해지는 사이야.' : score >= 60 ? '다른 만큼 배울 게 많은 사이야.' : '부딪히는 만큼 대화가 중요한 사이야.';
   return { score, reasons, pts, verdict, weave: weaveType(A, B) };
 }
+// ===== 궁합 심화: 서로에게 어떤 사람인지 · 끌림과 지속 · 엇갈림 · 당겨지는 달 =====
+const ROLE = {
+  '비견': ['거울 같은 친구', '결이 똑같은 사람이야. 말 안 해도 통하는데, 고집도 똑같이 세서 한번 부딪히면 둘 다 안 물러서.'],
+  '겁재': ['자극 주는 라이벌', '편한데 은근히 지기 싫은 사람이야. 그 팽팽함 때문에 오히려 더 빠져들어.'],
+  '식신': ['뭐든 해 주고 싶은 사람', '옆에 있으면 챙겨 주고 싶어지는 사람이야. 같이 먹고 놀 때 제일 행복해.'],
+  '상관': ['말문을 열게 하는 사람', '이 사람 앞에선 유난히 솔직해지고 말이 많아져. 대신 서운할 땐 말이 날카로워지기 쉬워.'],
+  '편재': ['자꾸 궁금해지는 사람', '만날수록 새로운 면이 보여서 설레. 다만 손에 잡힐 듯 안 잡혀서 애가 타기도 해.'],
+  '정재': ['오래 지키고 싶은 사람', '현실적으로 아끼고 지키고 싶은 사람이야. 시간이 갈수록 더 소중해지는 쪽이야.'],
+  '편관': ['거부할 수 없는 끌림', '강하게 끌리는데 묘하게 긴장되는 사람이야. 이 사람 앞에선 평소의 나답지 않아져.'],
+  '정관': ['기대고 싶은 든든함', '믿고 기댈 수 있는 사람이야. 이 사람이 정한 선은 이상하게 지키고 싶어져.'],
+  '편인': ['알 듯 모를 듯한 사람', '생각이 깊어지게 만드는 사람이야. 통하는 듯하다가 멀어져서 더 신경 쓰여.'],
+  '정인': ['포근한 안식처', '옆에 있으면 마음이 놓이는 사람이야. 받기만 하는 것 같아 미안해질 때도 있어.']
+};
+function roleOf(X, Y) { // X 입장에서 Y는 어떤 사람
+  const ten = tenOfStem(X.r.pillars.day.s, Y.r.pillars.day.s), R = ROLE[ten];
+  const star = GROUP[ten] === loveGroup(X.person.gender);
+  return { ten, name: R[0], text: R[1], star };
+}
+function pairChem(A, B) {
+  const pa = A.r.pillars, pb = B.r.pillars, ra = roleOf(A, B), rb = roleOf(B, A);
+  const dhA = [DOHWA[pa.year.b], DOHWA[pa.day.b]], dhB = [DOHWA[pb.year.b], DOHWA[pb.day.b]];
+  let pull = 40, keep = 50; const pullWhy = [], keepWhy = [];
+  if (isStemHe(pa.day.s, pb.day.s)) { pull += 25; pullWhy.push('두 일간이 천간합이라 처음부터 서로를 알아봐'); }
+  if (ra.star) { pull += 15; pullWhy.push(`${A.person.name} 사주가 찾는 연애의 별이 ${B.person.name}야`); }
+  if (rb.star) { pull += 15; pullWhy.push(`${B.person.name} 사주가 찾는 연애의 별이 ${A.person.name}야`); }
+  if (dhA.includes(pb.day.b) || dhB.includes(pa.day.b)) { pull += 10; pullWhy.push('한 사람의 실 끝이 다른 사람의 꽃매듭을 피워'); }
+  if (isChung(pa.day.b, pb.day.b)) { pull += 6; pullWhy.push('실 끝끼리 부딪혀서 오히려 강하게 끌려'); }
+  if (isLiuhe(pa.day.b, pb.day.b)) { keep += 16; keepWhy.push('실 끝이 육합이라 같이 지낼수록 편해져'); }
+  else if (isSanhe(pa.day.b, pb.day.b)) { keep += 10; keepWhy.push('실 끝이 삼합의 짝이라 같은 방향을 봐'); }
+  let fill = 0; for (let i = 0; i < 5; i++) { if ((A.r.count[i] === 0 && B.r.count[i] >= 2) || (B.r.count[i] === 0 && A.r.count[i] >= 2)) fill += 6; }
+  if (fill) { keep += Math.min(fill, 12); keepWhy.push('서로 없는 오행을 채워 줘서 균형이 맞아'); }
+  if (STEM_EL[pa.day.s] === STEM_EL[pb.day.s]) { keep += 5; keepWhy.push('같은 오행이라 생활 리듬이 비슷해'); }
+  if (isChung(pa.day.b, pb.day.b)) { keep -= 12; keepWhy.push('실 끝이 충이라 생활 방식이 자주 부딪혀'); }
+  if (isWonjin(pa.day.b, pb.day.b)) { keep -= 10; keepWhy.push('실 끝이 원진이라 서운함이 쌓이기 쉬워'); }
+  const cl = v => Math.max(30, Math.min(98, v)); pull = cl(pull); keep = cl(keep);
+  const type = pull >= 70 && keep >= 70 ? ['운명형', '처음부터 끌리고 오래 가는 드문 조합이야. 이 실은 쉽게 안 풀려.']
+    : pull >= 70 ? ['불꽃형', '처음엔 뜨겁게 끌리는데, 오래 가려면 엉킨 데를 같이 푸는 노력이 필요해.']
+    : keep >= 70 ? ['스며드는형', '첫눈에 반하진 않아도, 시간이 갈수록 조용히 깊어지는 조합이야.']
+    : ['맞춰 가는형', '자연스럽게 맞는 사이는 아니라서, 서로의 결을 알아 가는 만큼 단단해져.'];
+  return { ra, rb, pull, keep, pullWhy, keepWhy, type };
+}
+function pairMonths(A, B) {
+  const n = new Date(), out = [], da = A.r.pillars.day.b, db = B.r.pillars.day.b;
+  for (let i = 0; i < 12; i++) {
+    const dt = new Date(n.getFullYear(), n.getMonth() + i, 20), y = dt.getFullYear(), m = dt.getMonth() + 1;
+    const mp = calcSaju({ y, m, d: 20, h: 12, mi: 0, unknownTime: true, gender: 'F' }).pillars.month;
+    const ha = isLiuhe(mp.b, da) || isSanhe(mp.b, da), hb = isLiuhe(mp.b, db) || isSanhe(mp.b, db);
+    const ca = isChung(mp.b, da), cb = isChung(mp.b, db);
+    out.push({ y, m, mp, v: (ha ? 1 : 0) + (hb ? 1 : 0) - (ca ? 1 : 0) - (cb ? 1 : 0), both: ha && hb, clash: ca || cb });
+  }
+  return out;
+}
+function pairHTML(A, B) {
+  const C = pairChem(A, B), ms = pairMonths(A, B), first = ms[0];
+  const lbl = x => (x.y !== first.y ? `${String(x.y).slice(2)}년 ` : '') + `${x.m}월`;
+  const good = ms.filter(x => x.v > 0).sort((p, q) => q.v - p.v).slice(0, 3);
+  const bad = ms.filter(x => x.clash).slice(0, 2);
+  const roleCard = (X, Y, R) => `<div class="role"><span class="rk">${esc(X.person.name)}에게 ${esc(Y.person.name)}는</span><b>${R.name}</b><p>${R.text}</p>${R.star ? `<p class="star">★ ${esc(X.person.name)} 사주의 연애의 별(${X.person.gender === 'F' ? '관성' : '재성'})이 바로 이 사람이야</p>` : ''}<span class="tag">${R.ten}</span></div>`;
+  const meter = (k, v, why) => `<div class="pm"><div class="pmh"><b>${k}</b><span>${v}</span></div><div class="pmb"><i style="width:${v}%"></i></div>${why.length ? `<p class="fine">${why.map(esc).join(' · ')}</p>` : ''}</div>`;
+  const DA = LOVE_DETAIL[A.r.pillars.day.s], DB = LOVE_DETAIL[B.r.pillars.day.s];
+  return { C, html: `
+    <section class="card">
+      <h3>서로에게 어떤 사람이야?</h3>
+      <p class="fine">같은 두 사람이라도, 누구 쪽에서 보느냐에 따라 상대의 의미가 달라.</p>
+      <div class="roles">${roleCard(A, B, C.ra)}<div class="lockwrap"><div class="blur" aria-hidden="true">${roleCard(B, A, C.rb)}</div><button class="lockcta" data-unlock="role"><span>🔒</span>${esc(B.person.name)}에게 ${esc(A.person.name)}는 어떤 사람일까?<small>전체 리포트에서 확인</small></button></div></div>
+    </section>
+    <section class="card">
+      <h3>끌림과 오래 감 <span class="tag">${C.type[0]}</span></h3>
+      ${meter('첫 끌림', C.pull, C.pullWhy)}${meter('오래 감', C.keep, C.keepWhy)}
+      <p class="aside"><b>${C.type[0]}</b> · ${C.type[1]}</p>
+    </section>
+    <section class="card lockcard">
+      <h3>전체 리포트에서 볼 수 있어</h3>
+      <ul class="lockl"><li>${esc(B.person.name)}에게 ${esc(A.person.name)}는 어떤 사람인지</li><li>싸우면 어떻게 엇갈리고, 어떻게 풀어야 하는지</li><li>앞으로 1년, 둘의 실이 당겨지는 달과 흔들리는 달</li><li>궁금한 질문 1개에 대한 홍실의 답 + 리포트 카드 5장</li></ul>
+      <div class="lockwrap"><div class="blur" aria-hidden="true">
+    <div class="lk-in">
+      <h3>싸우면 이렇게 엇갈려</h3>
+      <div class="dl3"><div><span class="dk">${esc(A.person.name)}는</span><p>${DA[1]}</p></div><div><span class="dk">${esc(B.person.name)}는</span><p>${DB[1]}</p></div></div>
+      <p class="aside">풀 때는 ${C.ra.ten === '정관' || C.ra.ten === '정인' || C.rb.ten === '정관' || C.rb.ten === '정인' ? '기대는 쪽이 먼저 "나 서운했어" 한마디만 꺼내 주면 금방 풀려.' : C.type[0] === '불꽃형' ? '그 자리에서 결론 내지 말고 하루 지나서 다시 얘기하는 게 좋아.' : '누가 맞는지보다 어떤 기분이었는지부터 말하는 게 좋아.'}</p>
+    </div>
+    <div class="lk-in">
+      <h3>둘의 실이 당겨지는 달</h3>
+      ${good.length ? `<ul class="mt">${good.map(x => `<li><span class="ml">${lbl(x)}</span><span class="swc"><i style="background:var(--seal)"></i>${x.both ? '두 사람 실 끝이 함께 당겨져' : '한 사람 실 끝이 당겨져'}</span><span class="md">${x.both ? '고백·약속·여행 잡기 좋은 달' : '데이트 잡기 좋은 달'}</span></li>`).join('')}</ul>` : '<p>앞으로 1년은 크게 당겨지는 달 없이 잔잔해. 특별한 날을 직접 만들어 봐.</p>'}
+      ${bad.length ? `<p class="fine">${bad.map(lbl).join(', ')}은 한 사람의 실 끝이 흔들리는 달이라, 큰 결정이나 예민한 대화는 피하는 게 좋아.</p>` : ''}
+    </div>
+      </div><button class="lockcta big" data-unlock="report"><span>🔒</span>전체 리포트 받기<small>지금은 무료 체험단 모집 중</small></button></div>
+    </section>` };
+}
+
+
+function pairSummary() {
+  if (!match) return '';
+  const { A, B, m } = match, f = p => `${p.name}(${p.gender === 'F' ? '여' : '남'}) ${birthLabel(p)} ${p.unknownTime ? '시간 모름' : p.time}`;
+  return `[홍실 엮임 리포트 신청]\n${f(A.person)}\n${f(B.person)}\n결과: ${m.weave.name} · ${m.chem.type[0]} · 엮임 ${m.score}\n궁금한 것: `;
+}
+function openUnlock(from) {
+  track('unlock-open-' + from);
+  let sh = $('#unlock-sheet');
+  if (!sh) {
+    sh = document.createElement('div'); sh.className = 'modal'; sh.id = 'unlock-sheet'; sh.setAttribute('aria-hidden', 'true');
+    document.body.append(sh);
+    sh.onclick = e => { if (e.target === sh) closeUnlock(); };
+  }
+  sh.innerHTML = `<div class="sheet" role="dialog" aria-label="전체 리포트 받기">
+    <header><h2>홍실 엮임 리포트</h2><button class="btn sm ghost" id="ul-close">닫기</button></header>
+    <p>사이트에서 본 결과보다 깊게, 두 사람만을 위해 풀어 줄게.</p>
+    <ul class="lockl"><li>서로에게 어떤 사람인지 <b>양쪽 모두</b> 상세하게</li><li>싸움 패턴과 화해할 때 쓰면 좋은 말</li><li>앞으로 1년, 둘의 실이 당겨지는 달과 흔들리는 달</li><li>궁금한 질문 1개에 대한 답</li><li>인스타에 올릴 수 있는 리포트 카드 5장</li></ul>
+    <p class="ul-badge">지금은 <b>무료 체험단</b> 모집 중 · 선착순 30쌍 · 후기 남겨 주기 조건</p>
+    ${FORM_URL ? `<a class="btn brass wide" id="ul-form" href="${FORM_URL}" target="_blank" rel="noopener">신청서 쓰러 가기</a>` : ''}
+    <button class="btn ${FORM_URL ? 'ghost' : 'brass'} wide" id="ul-dm">인스타 DM으로 신청하기</button>
+    <p class="fine" style="margin:0">DM으로 신청할 땐 아래 버튼으로 두 사람 정보를 복사해서 붙여넣으면 돼. 생일은 리포트를 만든 뒤 지워.</p>
+    <button class="btn ghost wide" id="ul-copy">신청 내용 복사하기</button>
+  </div>`;
+  sh.classList.add('on'); sh.setAttribute('aria-hidden', 'false');
+  $('#ul-close').onclick = closeUnlock;
+  const copy = async () => { const t = pairSummary(); try { await navigator.clipboard.writeText(t); toast('신청 내용을 복사했어'); return true; } catch { prompt('아래 내용을 복사해 줘', t); return false; } };
+  $('#ul-copy').onclick = () => { track('unlock-copy'); copy(); };
+  $('#ul-dm').onclick = async () => { track('unlock-dm'); await copy(); location.href = DM_URL; };
+  const fm = $('#ul-form'); if (fm) fm.onclick = () => track('unlock-form');
+}
+function closeUnlock() { const sh = $('#unlock-sheet'); if (sh) { sh.classList.remove('on'); sh.setAttribute('aria-hidden', 'true'); } }
+
 function renderMatch(A, B) {
   track('result-match');
   const m = computeMatch(A, B);
+  const P = pairHTML(A, B); m.chem = P.C;
   match = { A, B, m };
   const side = X => `<div class="mside"><p class="mn">${esc(X.person.name)}</p><p class="mh"><i class="e${STEM_EL[X.r.pillars.day.s]}">${STEMS[X.r.pillars.day.s]}</i><i class="e${BRANCH_EL[X.r.pillars.day.b]}">${BRANCHES[X.r.pillars.day.b]}</i></p><p class="fine">${pKo(X.r.pillars.day)} 일주 · ${ANIMALS[X.r.pillars.year.b]}띠</p></div>`;
   $('#match-result').innerHTML = `
@@ -1749,12 +1898,14 @@ function renderMatch(A, B) {
       ${twoThreadSVG(THREAD[A.r.pillars.day.s], THREAD[B.r.pillars.day.s], m.weave.kind)}
       <p class="tline">${esc(A.person.name)}는 ${THREAD[A.r.pillars.day.s].name}, ${esc(B.person.name)}는 ${THREAD[B.r.pillars.day.s].name}</p>
       <p>${m.weave.desc}</p>
+      <p class="ptype"><span class="tag">${P.C.type[0]}</span> 첫 끌림 ${P.C.pull} · 오래 감 ${P.C.keep}</p>
       <div class="scorewrap">${ENSO}${RING(m.score)}<p class="score">${m.score}<small>엮임 점수</small></p></div>
       <p class="fine">${m.verdict}</p>
       <div class="mrow">${side(A)}<span class="x">×</span>${side(B)}</div>
     </section>
+    ${P.html}
     <section class="card">
-      <h3><span class="mark">合</span>이렇게 맞아</h3>
+      <h3><span class="mark">合</span>엮임 점수는 이렇게 나왔어</h3>
       <p class="fine">기본 58점에서 시작해서, 두 사람 원국에서 찾은 항목만큼 더하고 뺐어.</p>
       <ul class="why">${m.reasons.map((x, i) => `<li><span class="pt ${m.pts[i] >= 0 ? 'up' : 'dn'}">${m.pts[i] >= 0 ? '+' : ''}${m.pts[i]}</span><span>${esc(x)}</span></li>`).join('')}</ul>
       <div class="five-two">${elementBars(A.r.count, A.person.name)}${elementBars(B.r.count, B.person.name)}</div>
@@ -1767,6 +1918,7 @@ function renderMatch(A, B) {
     <div class="actions"><button class="btn brass" id="btn-card-match">인스타 카드 만들기</button></div>`;
   $('#btn-ai-match').onclick = () => runAI('match');
   $('#btn-card-match').onclick = () => openCard('match');
+  document.querySelectorAll('#match-result [data-unlock]').forEach(b => b.onclick = () => openUnlock(b.dataset.unlock));
   $('#match-result').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }
 
@@ -1919,7 +2071,7 @@ async function runAI(kind) {
     prompt = reunionPrompt(tone);
   } else {
     const { A, B, m } = match;
-    prompt = `너는 한국 명리학(사주) 궁합에 밝은 상담가야. 두 사람의 원국을 보고 궁합 풀이를 써 줘. 계산은 끝났으니 아래 값을 그대로 써.\n\n[본인]\n${describe(A.person, A.r)}\n\n[상대방]\n${describe(B.person, B.r)}\n\n기본 궁합 점수: ${m.score}점 (근거: ${m.reasons.join(' ')})\n\n다음 소제목 순서로 각 3~4문장: ## 서로 끌리는 이유 / ## 부딪히기 쉬운 지점 / ## 연애할 때 / ## 오래 가려면 / ## 한 줄 정리\n${tone}`;
+    prompt = `너는 한국 명리학(사주) 궁합에 밝은 상담가야. 두 사람의 원국을 보고 궁합 풀이를 써 줘. 계산은 끝났으니 아래 값을 그대로 써.\n\n[본인]\n${describe(A.person, A.r)}\n\n[상대방]\n${describe(B.person, B.r)}\n\n기본 궁합 점수: ${m.score}점 (근거: ${m.reasons.join(' ')})\n서로의 의미: ${A.person.name}에게 ${B.person.name}는 ${m.chem.ra.name}(${m.chem.ra.ten}), ${B.person.name}에게 ${A.person.name}는 ${m.chem.rb.name}(${m.chem.rb.ten})\n유형: ${m.chem.type[0]} (첫 끌림 ${m.chem.pull}, 오래 감 ${m.chem.keep})\n\n다음 소제목 순서로 각 3~4문장: ## 서로 끌리는 이유 / ## 부딪히기 쉬운 지점 / ## 연애할 때 / ## 오래 가려면 / ## 한 줄 정리\n${tone}`;
   }
   aiCtl = new AbortController();
   btn.disabled = true; stop.classList.remove('hide');
@@ -1967,6 +2119,8 @@ function renderSaved() {
 const CARD_W = 1080, CARD_H = 1350;
 const BRAND_HANDLE = '@hongsil.saju';
 const SITE_URL = 'hongsil-saju.github.io';
+const FORM_URL = ''; // 구글 폼 주소를 만들면 여기에 넣어요
+const DM_URL = 'https://ig.me/m/hongsil.saju';
 const CREAM = '#fbf1e1', BRASS = '#e2bf7a', SEAL = '#c0302a', INK = '#1e1a2b';
 const INK_EL = ['#2d7a68', '#bf3a26', '#a8761a', '#6f695f', '#1d2b5a'];
 const SKY_EL = ['#4fa58a', '#ee6446', '#e2ad48', '#f6efe2', '#15204a'];
@@ -2242,11 +2396,13 @@ function drawMatchCard(ctx, A, B, m, handle) {
   softWave(ctx, 60, 1020, 560, amp, 0, ta.hex, 12, ta.edge);
   softWave(ctx, 60, 1020, 560, amp, m.weave.kind === 'same' ? .5 : Math.PI, tb.hex, 12, tb.edge);
   let x = 90; x += softChip(ctx, x, 680, `${A.person.name} · ${ta.name}`, ta.edge || ta.hex) + 14; softChip(ctx, x, 680, `${B.person.name} · ${tb.name}`, tb.edge || tb.hex);
-  softRing(ctx, 870, 910, 104, m.score, 96, '엮임 점수');
-  ctx.fillStyle = SC.ink; ctx.font = '400 33px "Noto Sans KR", sans-serif';
-  let y = wrap(ctx, m.weave.desc, 90, 830, 640, 48, 'left', 4) + 70;
-  ctx.fillStyle = SC.mut; ctx.font = '400 30px "Noto Sans KR", sans-serif';
-  if (m.reasons[0] && y < 1160) wrap(ctx, '· ' + m.reasons[0], 90, Math.max(y, 1090), 900, 44, 'left', 2);
+  softRing(ctx, 870, 900, 104, m.score, 96, '엮임 점수');
+  const C = m.chem;
+  ctx.fillStyle = SC.mut; ctx.font = '500 28px "Noto Sans KR", sans-serif'; ctx.fillText(`${A.person.name}에게 ${B.person.name}는`, 90, 830);
+  ctx.fillStyle = SC.ink; ctx.font = '60px "Gowun Dodum", sans-serif'; fitFont(ctx, C.ra.name, 640, 60, '#px "Gowun Dodum", sans-serif'); ctx.fillText(C.ra.name, 90, 900);
+  ctx.fillStyle = SC.mut; ctx.font = '500 28px "Noto Sans KR", sans-serif'; ctx.fillText(`${B.person.name}에게 ${A.person.name}는`, 90, 980);
+  ctx.fillStyle = SC.rose; ctx.font = '60px "Gowun Dodum", sans-serif'; ctx.fillText('🔒 궁금하면 링크에서', 90, 1050);
+  let cx = 90; cx += softChip(ctx, cx, 1110, `${C.type[0]}`, SC.rose) + 12; softChip(ctx, cx, 1110, `첫 끌림 ${C.pull} · 오래 감 ${C.keep}`, null);
   softFoot(ctx, handle, SITE_URL);
 }
 function drawReunionCard(ctx, me, R, handle) {
