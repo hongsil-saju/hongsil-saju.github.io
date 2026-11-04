@@ -621,9 +621,13 @@ label.f.quick input{letter-spacing:.06em}
 .linkbtn{appearance:none;border:0;background:none;color:var(--seal);font:500 13px var(--sans);padding:0;justify-self:start;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .qh{font-size:12px;color:var(--e0);min-height:1em}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tc[data-k="black"]{color:#cfc6cc!important}:root:not([data-theme="light"]) .tc[data-k="white"]{color:#f6f2e8!important}}
+.studio{margin-bottom:24px}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.st-item img{width:100%;border-radius:10px;display:block}
+.st-item p{margin:4px 0!important;word-break:break-all}
 .card.ai{display:none!important}
 </style>
-<script>window.goatcounter = { path: function () { return location.pathname; } };</script>
+<script>(function () { try { if (location.hash === '#me-off') localStorage.setItem('skipgc', 't'); else if (location.hash === '#me-on') localStorage.removeItem('skipgc'); } catch (e) {} })(); window.goatcounter = { path: function () { return location.pathname; }, no_onload: (function () { try { return localStorage.getItem('skipgc') === 't'; } catch (e) { return false; } })() };</script>
 <script data-goatcounter="https://hongsil.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
@@ -1044,7 +1048,7 @@ const isSanhe = (a,b) => a!==b && SANHE.some(g => g.includes(a)&&g.includes(b));
 const isStemHe = (a,b) => Math.abs(a-b) === 5;
 
 // ===== 유틸 =====
-const track = (path) => { try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'ev/' + path, title: path, event: true }); } catch {} };
+const track = (path) => { try { if (localStorage.getItem('skipgc') === 't') return; if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'ev/' + path, title: path, event: true }); } catch {} };
 const hasBatchim = w => { const c = String(w).trim().slice(-1).charCodeAt(0); return c >= 0xAC00 && c <= 0xD7A3 ? (c - 0xAC00) % 28 !== 0 : false; };
 const J = (w, a, b) => w + (hasBatchim(w) ? a : b); // J('목','이','가')
 const useCap = name => Promise.resolve(null); const _claudeUseCap = name => (window.claude && claude.use) ? claude.use(name).catch(() => null) : Promise.resolve(null);
@@ -2381,9 +2385,95 @@ function init() {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCard(); });
   renderSaved();
 }
+// ===== 콘텐츠 스튜디오 (#studio · 운영자 전용) =====
+const HASH0 = location.hash;
+function drawCoverCard(ctx) {
+  softBg(ctx);
+  softLabel(ctx, '홍실 · 실 색 10가지', 90, 150);
+  ctx.fillStyle = SC.ink; ctx.font = '104px "Gowun Dodum", sans-serif'; ctx.fillText('너는', 86, 290);
+  ctx.fillStyle = SC.rose; ctx.fillText('무슨 색 실', 86, 410); const w = ctx.measureText('무슨 색 실').width;
+  ctx.fillStyle = SC.ink; ctx.fillText('이야?', 86 + w + 18, 410);
+  THREAD.forEach((th, i) => {
+    const col = i % 5, row = Math.floor(i / 5), cx = 160 + col * 190, cy = 580 + row * 230;
+    ctx.beginPath(); ctx.arc(cx, cy, 56, 0, 7); ctx.fillStyle = th.hex; ctx.fill();
+    if (th.edge) { ctx.lineWidth = 4; ctx.strokeStyle = th.edge; ctx.stroke(); }
+    ctx.textAlign = 'center'; ctx.fillStyle = SC.ink; ctx.font = '500 30px "Noto Sans KR", sans-serif'; ctx.fillText(th.name.replace(' 실', ''), cx, cy + 102);
+    ctx.fillStyle = SC.mut; ctx.font = '700 24px "Noto Serif KR", serif'; ctx.fillText(th.han, cx, cy + 138); ctx.textAlign = 'left';
+  });
+  ctx.fillStyle = SC.ink; ctx.font = '400 34px "Noto Sans KR", sans-serif';
+  wrap(ctx, '태어난 날의 천간(일간)이 네 실 색을 정해. 같은 띠, 같은 해에 태어나도 날이 다르면 실 색이 달라.', 90, 1080, 900, 52, 'left', 2);
+  softFoot(ctx, BRAND_HANDLE, SITE_URL);
+}
+function drawColorCard(ctx, i) {
+  softBg(ctx);
+  const th = THREAD[i], M = threadMatches(i), D = LOVE_DETAIL[i];
+  softLabel(ctx, `실 색 ${i + 1}/10 · ${th.han}(${th.ko}) ${th.kind} · ${STEMS_KO[i]}${EL[STEM_EL[i]]} 일간`, 90, 150);
+  ctx.fillStyle = th.text || th.hex; ctx.font = '132px "Gowun Dodum", sans-serif'; ctx.fillText(th.name, 84, 318);
+  ctx.fillStyle = SC.mut; ctx.font = '400 38px "Noto Sans KR", sans-serif'; ctx.fillText(th.line, 90, 392);
+  const pts = softWave(ctx, 60, 1020, 540, 60, .4, th.hex, 14, th.edge);
+  const [ex, ey] = pts[100]; ctx.save(); ctx.translate(ex - 10, ey); ctx.scale(2.6, 2.6); ctx.fillStyle = SC.rose; ctx.fill(new Path2D('M0 -5c-3-5-10-3-10 2 0 5 10 10 10 10s10-5 10-10c0-5-7-7-10-2z')); ctx.restore();
+  ctx.fillStyle = SC.ink; ctx.font = '400 35px "Noto Sans KR", sans-serif';
+  let y = wrap(ctx, th.love, 90, 700, 900, 54, 'left', 3) + 90;
+  ctx.fillStyle = SC.paper; rrect(ctx, 90, y - 50, 900, 160, 28); ctx.fill();
+  ctx.fillStyle = SC.rose; ctx.font = '700 26px "Noto Sans KR", sans-serif'; ctx.fillText('이런 사람한테 끌려', 124, y - 6);
+  ctx.fillStyle = SC.ink; ctx.font = '400 31px "Noto Sans KR", sans-serif'; wrap(ctx, D[0], 124, y + 44, 830, 44, 'left', 2);
+  ctx.fillStyle = SC.mut; ctx.font = '500 28px "Noto Sans KR", sans-serif'; ctx.fillText('서로 감기는 실', 90, 1170);
+  softChip(ctx, 320, 1128, M.he.name, M.he.edge || M.he.hex);
+  softFoot(ctx, BRAND_HANDLE, SITE_URL);
+}
+function colorCaption(i) {
+  const th = THREAD[i];
+  return `${th.name} 🧶\n${th.line}. ${th.love}\n\n너도 ${th.name}이야? 프로필 링크에서 생일로 확인하고 댓글에 네 실 색 남겨 줘.\n\n#연애사주 #연애운 #궁합 #사주 #${th.name.replace(/\s/g, '')} #홍실`;
+}
+async function openStudio() {
+  try { await Promise.all(['104px "Gowun Dodum"', '400 34px "Noto Sans KR"', '700 26px "Noto Sans KR"', '700 24px "Noto Serif KR"'].map(f => document.fonts.load(f, '실색甲'))); } catch {}
+  const sec = document.createElement('section'); sec.className = 'card studio'; sec.id = 'studio';
+  sec.innerHTML = `<h3>콘텐츠 스튜디오 <span class="tag">운영자 전용</span></h3>
+    <p class="fine">이 화면은 주소 끝에 #studio를 붙였을 때만 보여. 피드용 1080×1350 카드 11장(표지 + 실 색 10장)을 만들어 줘.</p>
+    <div class="row"><button class="btn brass" id="st-share">사진 앱에 한 번에 저장</button><button class="btn ghost" id="st-zip">ZIP으로 받기</button></div>
+    <p class="fine" id="st-msg">카드를 그리는 중이야…</p><div class="st-grid" id="st-grid"></div>`;
+  document.querySelector('.wrap').prepend(sec);
+  const cv = document.createElement('canvas'); cv.width = CARD_W; cv.height = CARD_H; const ctx = cv.getContext('2d');
+  const files = [];
+  for (let i = -1; i < 10; i++) {
+    ctx.clearRect(0, 0, CARD_W, CARD_H);
+    if (i < 0) drawCoverCard(ctx); else drawColorCard(ctx, i);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const name = `홍실_${String(i + 1).padStart(2, '0')}_${i < 0 ? '표지' : THREAD[i].name.replace(/\s/g, '')}.png`;
+    files.push(new File([blob], name, { type: 'image/png' }));
+    const url = URL.createObjectURL(blob);
+    const item = document.createElement('div'); item.className = 'st-item';
+    item.innerHTML = `<img src="${url}" alt="${esc(name)}"><p class="fine">${esc(name)}</p>${i >= 0 ? `<button class="btn sm ghost" data-cap="${i}">캡션 복사</button>` : ''}`;
+    $('#st-grid').append(item);
+  }
+  $('#st-msg').textContent = '이미지를 길게 눌러 하나씩 저장해도 되고, 위 버튼으로 한 번에 저장해도 돼.';
+  $('#st-grid').onclick = async e => { const b = e.target.closest('[data-cap]'); if (!b) return; try { await navigator.clipboard.writeText(colorCaption(+b.dataset.cap)); toast('캡션을 복사했어'); } catch { prompt('캡션을 복사해 줘', colorCaption(+b.dataset.cap)); } };
+  $('#st-share').onclick = async () => {
+    try { if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, title: '홍실 실 색 카드' }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    toast('이 브라우저는 한 번에 저장이 안 돼. ZIP으로 받거나 길게 눌러 저장해 줘');
+  };
+  $('#st-zip').onclick = async () => {
+    $('#st-msg').textContent = 'ZIP 만드는 중…';
+    try {
+      if (!window.JSZip) await new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = no; document.head.append(s); });
+      const zip = new JSZip(); files.forEach(f => zip.file(f.name, f)); files.forEach((f, k) => { if (k > 0) zip.file(f.name.replace('.png', '_캡션.txt'), colorCaption(k - 1)); });
+      const blob = await zip.generateAsync({ type: 'blob' }); const u = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = u; a.download = '홍실_실색카드.zip'; document.body.append(a); a.click(); a.remove();
+      $('#st-msg').textContent = 'ZIP을 받았어. 파일 앱에서 눌러 압축을 풀면 돼.';
+    } catch { $('#st-msg').textContent = 'ZIP을 만들지 못했어. 이미지를 길게 눌러 저장해 줘.'; }
+  };
+  sec.scrollIntoView();
+}
+function initOwner() {
+  if (HASH0 === '#me-off') setTimeout(() => toast('이 휴대폰 방문은 이제 통계에서 빠져'), 400);
+  if (HASH0 === '#me-on') setTimeout(() => toast('이 휴대폰 방문을 다시 통계에 넣어'), 400);
+  if (HASH0 === '#studio') openStudio();
+}
+
 init();
 initLanding();
 initBottomNav();
+initOwner();
 receiveThread();
 
 </script>
