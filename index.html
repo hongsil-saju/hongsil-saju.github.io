@@ -1962,6 +1962,7 @@ function renderSaved() {
 // ===== 인스타 카드 =====
 const CARD_W = 1080, CARD_H = 1350;
 const BRAND_HANDLE = '@hongsil.saju';
+const SITE_URL = 'hongsil-saju.github.io';
 const CREAM = '#fbf1e1', BRASS = '#e2bf7a', SEAL = '#c0302a', INK = '#1e1a2b';
 const INK_EL = ['#2d7a68', '#bf3a26', '#a8761a', '#6f695f', '#1d2b5a'];
 const SKY_EL = ['#4fa58a', '#ee6446', '#e2ad48', '#f6efe2', '#15204a'];
@@ -2126,7 +2127,7 @@ function drawThreadCard(ctx, person, th, sinsal, tangle, handle) {
   g = ctx.createRadialGradient(W * .9, H * .05, 20, W * .9, H * .05, H * .6); g.addColorStop(0, 'rgba(255,190,200,.55)'); g.addColorStop(1, 'rgba(255,190,200,0)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-  ctx.fillStyle = MUT; ctx.font = '500 30px "Noto Sans KR", sans-serif'; ctx.fillText(`${person.name}의 붉은 실`, 90, 150);
+  ctx.fillStyle = MUT; ctx.font = '500 30px "Noto Sans KR", sans-serif'; ctx.fillText(`${person.name}의 실`, 90, 150);
   ctx.fillStyle = INKc; ctx.font = '104px "Gowun Dodum", sans-serif'; ctx.fillText('나는', 86, 290);
   ctx.fillStyle = th.text || th.hex; ctx.fillText(th.name, 86, 410);
   const w1 = ctx.measureText(th.name).width; ctx.fillStyle = INKc; ctx.fillText('이래', 86 + w1 + 14, 410);
@@ -2155,10 +2156,13 @@ function drawThreadCard(ctx, person, th, sinsal, tangle, handle) {
   if (tangle) chips.push('실 끝 엉킴');
   chips.forEach(t => { const w = ctx.measureText(t).width + 48; if (x + w > 990) return; ctx.fillStyle = '#ffffff'; rrect(ctx, x, y, w, 62, 31); ctx.fill(); ctx.fillStyle = INKc; ctx.fillText(t, x + 24, y + 42); x += w + 14; });
   ctx.fillStyle = INKc; ctx.font = '400 36px "Noto Sans KR", sans-serif';
-  wrap(ctx, th.love, 90, 960, 900, 56, 'left', 4);
+  const ly = wrap(ctx, th.love, 90, 960, 900, 56, 'left', 4);
+  const M = threadMatches(current.r.pillars.day.s);
+  ctx.fillStyle = MUT; ctx.font = '500 28px "Noto Sans KR", sans-serif'; ctx.fillText('나랑 서로 감기는 실', 90, Math.max(ly + 96, 1120));
+  softChip(ctx, 380, Math.max(ly + 96, 1120) - 42, M.he.name, M.he.edge || M.he.hex);
   ctx.strokeStyle = 'rgba(236,90,108,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(90, 1240); ctx.lineTo(990, 1240); ctx.stroke();
   ctx.fillStyle = MUT; ctx.font = '500 30px "Noto Sans KR", sans-serif'; ctx.textAlign = 'left'; ctx.fillText(handle, 90, 1292);
-  ctx.textAlign = 'right'; ctx.fillText('생일로 보는 내 실 색', 990, 1292);
+  ctx.textAlign = 'right'; ctx.fillText(SITE_URL, 990, 1292);
 }
 // ===== 카드: 홍실 소프트 스타일 공통 =====
 const SC = { ink: '#3b2930', mut: '#8b727a', rose: '#ec5a6c', soft: '#ffe3e7', paper: '#ffffff',
@@ -2222,7 +2226,7 @@ function drawPillarCard(ctx, person, r, a, handle) {
   let cx = 170; EL.forEach((e, i) => { cx += softChip(ctx, cx, 982, `${e} ${r.count[i]}`, SC.el[i]) + 12; });
   ctx.fillStyle = SC.ink; ctx.font = '400 34px "Noto Sans KR", sans-serif';
   wrap(ctx, `${a.yp.year}년 연애는, ${YEAR_LOVE[a.yTen]}`, 90, 1120, 900, 50, 'left', 2);
-  softFoot(ctx, handle, '생일로 보는 연애 사주');
+  softFoot(ctx, handle, SITE_URL);
 }
 function drawMatchCard(ctx, A, B, m, handle) {
   softBg(ctx);
@@ -2239,7 +2243,7 @@ function drawMatchCard(ctx, A, B, m, handle) {
   let y = wrap(ctx, m.weave.desc, 90, 830, 640, 48, 'left', 4) + 70;
   ctx.fillStyle = SC.mut; ctx.font = '400 30px "Noto Sans KR", sans-serif';
   if (m.reasons[0] && y < 1160) wrap(ctx, '· ' + m.reasons[0], 90, Math.max(y, 1090), 900, 44, 'left', 2);
-  softFoot(ctx, handle, '생일로 보는 두 실의 엮임');
+  softFoot(ctx, handle, SITE_URL);
 }
 function drawReunionCard(ctx, me, R, handle) {
   softBg(ctx);
@@ -2257,7 +2261,7 @@ function drawReunionCard(ctx, me, R, handle) {
   let x = 90; (R.good.length ? R.good.slice(0, 3).map(g => monthLabel(g, first)) : ['잔잔한 1년, 계기를 기다려']).forEach(t => { x += softChip(ctx, x, 1030, t, R.good.length ? SC.rose : null) + 14; });
   ctx.fillStyle = SC.ink; ctx.font = '400 30px "Noto Sans KR", sans-serif';
   wrap(ctx, `${R.type.t} · ${R.type.tip}`, 90, 1160, 900, 42, 'left', 1);
-  softFoot(ctx, handle, '생일로 보는 재회 타이밍');
+  softFoot(ctx, handle, SITE_URL);
 }
 async function drawCard() {
   const cv = $('#card-canvas'), ctx = cv.getContext('2d');
