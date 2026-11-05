@@ -2588,7 +2588,7 @@ function drawColorCard(ctx, i) {
 }
 function colorCaption(i) {
   const th = THREAD[i];
-  return `${th.name} 🧶\n${th.line}. ${th.love}\n\n너도 ${th.name}이야? 프로필 링크에서 생일로 확인하고 댓글에 네 실 색 남겨 줘.\n\n#연애사주 #연애운 #궁합 #사주 #${th.name.replace(/\s/g, '')} #홍실`;
+  return `${th.name} 🧶\n${th.line}. ${th.love}\n\n너도 ${th.name}이야? 프로필 링크에서 생일로 확인하고 댓글에 네 실 색 남겨 줘.\n\n#연애사주 #연애운 #궁합 #${th.name.replace(/\s/g, '')} #홍실`;
 }
 const TX_ICON = ['💧', '🧵', '🌱', '🌸', '🌫️', '☀️', '🔥', '🏜️', '✨', '📿', '🍁', '🌙'];
 const LIUHE_OF = b => { const p = LIUHE.find(([x, y]) => x === b || y === b); return p[0] === b ? p[1] : p[0]; };
@@ -2629,7 +2629,7 @@ function drawTxCard(ctx, k) {
 }
 function txCaption(k) {
   const t = TEXTURE[k], pair = LIUHE_OF(k);
-  return `${t[0]} ${TX_ICON[k]}\n${t[1]}\n\n꼭 맞물리는 결은 ${TEXTURE[pair][0]}. 네 실 끝은 무슨 결이야? 프로필 링크에서 생일로 확인하고 댓글에 남겨 줘.\n\n#연애사주 #연애운 #궁합 #사주 #일지 #${t[0]} #홍실`;
+  return `${t[0]} ${TX_ICON[k]}\n${t[1]}\n\n꼭 맞물리는 결은 ${TEXTURE[pair][0]}. 네 실 끝은 무슨 결이야? 프로필 링크에서 생일로 확인하고 댓글에 남겨 줘.\n\n#연애사주 #연애운 #궁합 #${t[0]} #홍실`;
 }
 async function renderStudioSet(host, key, title, items) {
   const box = document.createElement('div'); box.className = 'st-set';
