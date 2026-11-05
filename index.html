@@ -656,6 +656,8 @@ label.f.quick input{letter-spacing:.06em}
 .foot-more summary::after{content:" +"}
 .foot-more[open] summary::after{content:" −"}
 @media (min-width:600px){.bnav{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+.st-set{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.st-set h4{margin:0 0 6px!important}
 .card.ai{display:none!important}
 </style>
 <script>(function () { try { if (location.hash === '#me-off') localStorage.setItem('skipgc', 't'); else if (location.hash === '#me-on') localStorage.removeItem('skipgc'); } catch (e) {} })(); window.goatcounter = { path: function () { return location.pathname; }, no_onload: (function () { try { return localStorage.getItem('skipgc') === 't'; } catch (e) { return false; } })() };</script>
@@ -2588,44 +2590,90 @@ function colorCaption(i) {
   const th = THREAD[i];
   return `${th.name} 🧶\n${th.line}. ${th.love}\n\n너도 ${th.name}이야? 프로필 링크에서 생일로 확인하고 댓글에 네 실 색 남겨 줘.\n\n#연애사주 #연애운 #궁합 #사주 #${th.name.replace(/\s/g, '')} #홍실`;
 }
+const TX_ICON = ['💧', '🧵', '🌱', '🌸', '🌫️', '☀️', '🔥', '🏜️', '✨', '📿', '🍁', '🌙'];
+const LIUHE_OF = b => { const p = LIUHE.find(([x, y]) => x === b || y === b); return p[0] === b ? p[1] : p[0]; };
+function drawTxCover(ctx) {
+  softBg(ctx);
+  softLabel(ctx, '홍실 · 실 끝의 결 12가지', 90, 150);
+  ctx.fillStyle = SC.ink; ctx.font = '100px "Gowun Dodum", sans-serif'; ctx.fillText('네 실 끝은', 86, 285);
+  ctx.fillStyle = SC.rose; ctx.fillText('무슨 결', 86, 400); const w = ctx.measureText('무슨 결').width;
+  ctx.fillStyle = SC.ink; ctx.fillText('이야?', 86 + w + 18, 400);
+  TEXTURE.forEach((t, k) => {
+    const col = k % 4, row = Math.floor(k / 4), x = 90 + col * 232, y = 470 + row * 190;
+    ctx.fillStyle = SC.paper; rrect(ctx, x, y, 208, 166, 28); ctx.fill();
+    ctx.textAlign = 'center'; ctx.font = '56px "Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.fillText(TX_ICON[k], x + 104, y + 74);
+    ctx.fillStyle = SC.ink; ctx.font = '500 30px "Noto Sans KR", sans-serif'; ctx.fillText(t[0], x + 104, y + 124);
+    ctx.fillStyle = SC.mut; ctx.font = '700 22px "Noto Serif KR", serif'; ctx.fillText(BRANCHES[k], x + 104, y + 154); ctx.textAlign = 'left';
+  });
+  ctx.fillStyle = SC.ink; ctx.font = '400 32px "Noto Sans KR", sans-serif';
+  wrap(ctx, '태어난 날의 지지(일지)가 네 실 끝의 결을 정해. 띠(태어난 해)와는 달라서, 같은 띠여도 결이 달라.', 90, 1080, 900, 50, 'left', 2);
+  softFoot(ctx, BRAND_HANDLE, SITE_URL);
+}
+function drawTxCard(ctx, k) {
+  softBg(ctx);
+  const t = TEXTURE[k], pair = LIUHE_OF(k), clash = (k + 6) % 12;
+  softLabel(ctx, `홍실 · 실 끝의 결 · ${BRANCHES[k]}(${BRANCHES_KO[k]}) 일지`, 90, 150);
+  ctx.fillStyle = SC.rose; ctx.font = '132px "Gowun Dodum", sans-serif'; ctx.fillText(t[0], 84, 318);
+  ctx.fillStyle = SC.mut; ctx.font = '400 36px "Noto Sans KR", sans-serif'; ctx.fillText('실 끝 = 연애할 때 곁에 두는 사람의 자리', 90, 392);
+  const pts = softWave(ctx, 60, 860, 540, 46, .4, '#e8a3ad', 12);
+  ctx.font = '120px "Apple Color Emoji","Noto Color Emoji",sans-serif'; ctx.textAlign = 'center'; ctx.fillText(TX_ICON[k], 930, 585); ctx.textAlign = 'left';
+  ctx.fillStyle = SC.ink; ctx.font = '400 36px "Noto Sans KR", sans-serif';
+  const y = wrap(ctx, t[1], 90, 720, 900, 56, 'left', 4) + 100;
+  ctx.fillStyle = SC.paper; rrect(ctx, 90, y - 52, 900, 180, 28); ctx.fill();
+  ctx.fillStyle = SC.rose; ctx.font = '700 26px "Noto Sans KR", sans-serif'; ctx.fillText('꼭 맞물리는 결', 124, y - 8);
+  ctx.fillStyle = SC.ink; ctx.font = '500 32px "Noto Sans KR", sans-serif'; ctx.fillText(`${TX_ICON[pair]} ${TEXTURE[pair][0]}`, 124, y + 40);
+  ctx.fillStyle = SC.mut; ctx.font = '700 26px "Noto Sans KR", sans-serif'; ctx.fillText('부딪히는 결', 560, y - 8);
+  ctx.fillStyle = SC.ink; ctx.font = '500 32px "Noto Sans KR", sans-serif'; ctx.fillText(`${TX_ICON[clash]} ${TEXTURE[clash][0]}`, 560, y + 40);
+  ctx.fillStyle = SC.mut; ctx.font = '400 24px "Noto Sans KR", sans-serif'; ctx.fillText('육합 · 충 기준', 124, y + 92);
+  softFoot(ctx, BRAND_HANDLE, SITE_URL);
+}
+function txCaption(k) {
+  const t = TEXTURE[k], pair = LIUHE_OF(k);
+  return `${t[0]} ${TX_ICON[k]}\n${t[1]}\n\n꼭 맞물리는 결은 ${TEXTURE[pair][0]}. 네 실 끝은 무슨 결이야? 프로필 링크에서 생일로 확인하고 댓글에 남겨 줘.\n\n#연애사주 #연애운 #궁합 #사주 #일지 #${t[0]} #홍실`;
+}
+async function renderStudioSet(host, key, title, items) {
+  const box = document.createElement('div'); box.className = 'st-set';
+  box.innerHTML = `<h4>${title}</h4><div class="row"><button class="btn brass" data-share>사진 앱에 한 번에 저장</button><button class="btn ghost" data-zip>ZIP으로 받기</button></div><p class="fine" data-msg>카드를 그리는 중이야…</p><div class="st-grid"></div>`;
+  host.append(box);
+  const grid = box.querySelector('.st-grid'), msg = box.querySelector('[data-msg]');
+  const cv = document.createElement('canvas'); cv.width = CARD_W; cv.height = CARD_H; const ctx = cv.getContext('2d');
+  const files = [], caps = [];
+  for (const it of items) {
+    ctx.clearRect(0, 0, CARD_W, CARD_H); it.draw(ctx);
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    files.push(new File([blob], it.name, { type: 'image/png' })); caps.push(it.cap || '');
+    const el = document.createElement('div'); el.className = 'st-item';
+    el.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="${esc(it.name)}"><p class="fine">${esc(it.name)}</p>${it.cap ? `<button class="btn sm ghost" data-cap="${caps.length - 1}">캡션 복사</button>` : ''}`;
+    grid.append(el);
+  }
+  msg.textContent = '이미지를 길게 눌러 하나씩 저장해도 되고, 위 버튼으로 한 번에 저장해도 돼.';
+  grid.onclick = async e => { const b = e.target.closest('[data-cap]'); if (!b) return; const c = caps[+b.dataset.cap]; try { await navigator.clipboard.writeText(c); toast('캡션을 복사했어'); } catch { prompt('캡션을 복사해 줘', c); } };
+  box.querySelector('[data-share]').onclick = async () => {
+    try { if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, title }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    toast('이 브라우저는 한 번에 저장이 안 돼. ZIP으로 받거나 길게 눌러 저장해 줘');
+  };
+  box.querySelector('[data-zip]').onclick = async () => {
+    msg.textContent = 'ZIP 만드는 중…';
+    try {
+      if (!window.JSZip) await new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = no; document.head.append(s); });
+      const zip = new JSZip(); files.forEach((f, k) => { zip.file(f.name, f); if (caps[k]) zip.file(f.name.replace('.png', '_캡션.txt'), caps[k]); });
+      const u = URL.createObjectURL(await zip.generateAsync({ type: 'blob' }));
+      const a2 = document.createElement('a'); a2.href = u; a2.download = `홍실_${key}.zip`; document.body.append(a2); a2.click(); a2.remove();
+      msg.textContent = 'ZIP을 받았어. 파일 앱에서 눌러 압축을 풀면 돼.';
+    } catch { msg.textContent = 'ZIP을 만들지 못했어. 이미지를 길게 눌러 저장해 줘.'; }
+  };
+}
 async function openStudio() {
   try { await Promise.all(['104px "Gowun Dodum"', '400 34px "Noto Sans KR"', '700 26px "Noto Sans KR"', '700 24px "Noto Serif KR"'].map(f => document.fonts.load(f, '실색甲'))); } catch {}
   const sec = document.createElement('section'); sec.className = 'card studio'; sec.id = 'studio';
-  sec.innerHTML = `<h3>콘텐츠 스튜디오 <span class="tag">운영자 전용</span></h3>
-    <p class="fine">이 화면은 주소 끝에 #studio를 붙였을 때만 보여. 피드용 1080×1350 카드 11장(표지 + 실 색 10장)을 만들어 줘.</p>
-    <div class="row"><button class="btn brass" id="st-share">사진 앱에 한 번에 저장</button><button class="btn ghost" id="st-zip">ZIP으로 받기</button></div>
-    <p class="fine" id="st-msg">카드를 그리는 중이야…</p><div class="st-grid" id="st-grid"></div>`;
-  document.querySelector('.wrap').prepend(sec);
-  const cv = document.createElement('canvas'); cv.width = CARD_W; cv.height = CARD_H; const ctx = cv.getContext('2d');
-  const files = [];
-  for (let i = -1; i < 10; i++) {
-    ctx.clearRect(0, 0, CARD_W, CARD_H);
-    if (i < 0) drawCoverCard(ctx); else drawColorCard(ctx, i);
-    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
-    const name = `홍실_${String(i + 1).padStart(2, '0')}_${i < 0 ? '표지' : THREAD[i].name.replace(/\s/g, '')}.png`;
-    files.push(new File([blob], name, { type: 'image/png' }));
-    const url = URL.createObjectURL(blob);
-    const item = document.createElement('div'); item.className = 'st-item';
-    item.innerHTML = `<img src="${url}" alt="${esc(name)}"><p class="fine">${esc(name)}</p>${i >= 0 ? `<button class="btn sm ghost" data-cap="${i}">캡션 복사</button>` : ''}`;
-    $('#st-grid').append(item);
-  }
-  $('#st-msg').textContent = '이미지를 길게 눌러 하나씩 저장해도 되고, 위 버튼으로 한 번에 저장해도 돼.';
-  $('#st-grid').onclick = async e => { const b = e.target.closest('[data-cap]'); if (!b) return; try { await navigator.clipboard.writeText(colorCaption(+b.dataset.cap)); toast('캡션을 복사했어'); } catch { prompt('캡션을 복사해 줘', colorCaption(+b.dataset.cap)); } };
-  $('#st-share').onclick = async () => {
-    try { if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, title: '홍실 실 색 카드' }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
-    toast('이 브라우저는 한 번에 저장이 안 돼. ZIP으로 받거나 길게 눌러 저장해 줘');
-  };
-  $('#st-zip').onclick = async () => {
-    $('#st-msg').textContent = 'ZIP 만드는 중…';
-    try {
-      if (!window.JSZip) await new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'; s.onload = ok; s.onerror = no; document.head.append(s); });
-      const zip = new JSZip(); files.forEach(f => zip.file(f.name, f)); files.forEach((f, k) => { if (k > 0) zip.file(f.name.replace('.png', '_캡션.txt'), colorCaption(k - 1)); });
-      const blob = await zip.generateAsync({ type: 'blob' }); const u = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = u; a.download = '홍실_실색카드.zip'; document.body.append(a); a.click(); a.remove();
-      $('#st-msg').textContent = 'ZIP을 받았어. 파일 앱에서 눌러 압축을 풀면 돼.';
-    } catch { $('#st-msg').textContent = 'ZIP을 만들지 못했어. 이미지를 길게 눌러 저장해 줘.'; }
-  };
-  sec.scrollIntoView();
+  sec.innerHTML = `<h3>콘텐츠 스튜디오 <span class="tag">운영자 전용</span></h3><p class="fine">주소 끝에 #studio를 붙였을 때만 보여. 피드용 1080×1350 카드야.</p>`;
+  document.querySelector('.wrap').prepend(sec); sec.scrollIntoView();
+  await renderStudioSet(sec, '실색카드', '① 실 색 10가지 (표지 + 10장)', [
+    { name: '홍실_실색_00_표지.png', draw: drawCoverCard },
+    ...THREAD.map((th, i) => ({ name: `홍실_실색_${String(i + 1).padStart(2, '0')}_${th.name.replace(/\s/g, '')}.png`, draw: c => drawColorCard(c, i), cap: colorCaption(i) }))]);
+  await renderStudioSet(sec, '실끝결카드', '② 실 끝의 결 12가지 (표지 + 12장)', [
+    { name: '홍실_결_00_표지.png', draw: drawTxCover },
+    ...TEXTURE.map((t, k) => ({ name: `홍실_결_${String(k + 1).padStart(2, '0')}_${t[0]}.png`, draw: c => drawTxCard(c, k), cap: txCaption(k) }))]);
 }
 function initOwner() {
   if (HASH0 === '#me-off') setTimeout(() => toast('이 휴대폰 방문은 이제 통계에서 빠져'), 400);
