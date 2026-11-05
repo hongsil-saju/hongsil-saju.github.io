@@ -2570,7 +2570,7 @@ function drawCoverCard(ctx) {
 function drawColorCard(ctx, i) {
   softBg(ctx);
   const th = THREAD[i], M = threadMatches(i), D = LOVE_DETAIL[i];
-  softLabel(ctx, `실 색 ${i + 1}/10 · ${th.han}(${th.ko}) ${th.kind} · ${STEMS_KO[i]}${EL[STEM_EL[i]]} 일간`, 90, 150);
+  softLabel(ctx, `홍실 · ${th.han}(${th.ko}) ${th.kind} · ${STEMS_KO[i]}${EL[STEM_EL[i]]} 일간`, 90, 150);
   ctx.fillStyle = th.text || th.hex; ctx.font = '132px "Gowun Dodum", sans-serif'; ctx.fillText(th.name, 84, 318);
   ctx.fillStyle = SC.mut; ctx.font = '400 38px "Noto Sans KR", sans-serif'; ctx.fillText(th.line, 90, 392);
   const pts = softWave(ctx, 60, 1020, 540, 60, .4, th.hex, 14, th.edge);
