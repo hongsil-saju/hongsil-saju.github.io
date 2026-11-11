@@ -2669,10 +2669,10 @@ async function openStudio() {
   sec.innerHTML = `<h3>콘텐츠 스튜디오 <span class="tag">운영자 전용</span></h3><p class="fine">주소 끝에 #studio를 붙였을 때만 보여. 피드용 1080×1350 카드야.</p>`;
   document.querySelector('.wrap').prepend(sec); sec.scrollIntoView();
   await renderStudioSet(sec, '실색카드', '① 실 색 10가지 (표지 + 10장)', [
-    { name: '홍실_실색_00_표지.png', draw: drawCoverCard },
+    { name: '홍실_실색_00_표지.png', draw: drawCoverCard, cap: '너는 무슨 색 실이야? 🧶\n\n태어난 날의 천간이 네 실 색을 정해. 같은 띠, 같은 해에 태어나도 날이 다르면 실 색이 달라.\n쪽빛·초록·다홍·연지·노란·황토·흰·옥빛·검은·보랏빛, 모두 10가지야.\n\n프로필 링크에서 생일만 넣고 확인해 봐. 댓글에 네 실 색 남겨 주면 그 실 이야기 해 줄게.\n\n#연애사주 #연애운 #궁합 #사주 #홍실' },
     ...THREAD.map((th, i) => ({ name: `홍실_실색_${String(i + 1).padStart(2, '0')}_${th.name.replace(/\s/g, '')}.png`, draw: c => drawColorCard(c, i), cap: colorCaption(i) }))]);
   await renderStudioSet(sec, '실끝결카드', '② 실 끝의 결 12가지 (표지 + 12장)', [
-    { name: '홍실_결_00_표지.png', draw: drawTxCover },
+    { name: '홍실_결_00_표지.png', draw: drawTxCover, cap: '네 실 끝은 무슨 결이야? 🧶\n\n실 끝은 연애할 때 곁에 두는 사람의 자리야. 태어난 날의 지지가 정해서, 띠와는 달라.\n이슬결부터 달빛결까지 12가지. 꼭 맞물리는 결도 따로 있어.\n\n프로필 링크에서 생일로 확인하고 댓글에 네 결 남겨 줘.\n\n#연애사주 #연애운 #궁합 #사주 #홍실' },
     ...TEXTURE.map((t, k) => ({ name: `홍실_결_${String(k + 1).padStart(2, '0')}_${t[0]}.png`, draw: c => drawTxCard(c, k), cap: txCaption(k) }))]);
 }
 function initOwner() {
